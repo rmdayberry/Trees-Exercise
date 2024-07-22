@@ -19,7 +19,7 @@ class BinaryTree {
   minDepth(node = this.root) {
     if (!node) return 0;
     if (!node.left && !node.right) return 1;
-    if (!node.left) return this.minDepth(node.right) + 1;
+    if (!node.left) this.minDepth(node.right) + 1;
     if (!node.right) return this.minDepth(node.left) + 1;
     return Math.min(this.minDepth(node.left), this.minDepth(node.right)) + 1;
   }
@@ -41,8 +41,7 @@ class BinaryTree {
       if (!node) return 0;
       let leftMax = Math.max(0, helper(node.left));
       let rightMax = Math.max(0, helper(node.right));
-      result.max = Math.max(result.max, node.val + leftMax + rightMax);
-      return node.val + Math.max(leftMax, rightMax);
+      result.max = Math.max(leftMax, rightMax);
     }
     helper(node);
     return result.max;
@@ -75,24 +74,18 @@ class BinaryTree {
    * (i.e. are at the same level but have different parents. ) */
 
   areCousins(node1, node2) {
-    if (!this.root) return false;
+    if(!this.root) return false;
 
-    function levelParent(node, target, level = 0, parent = null) {
-      if (!node) return null;
-      if (node === target) return { level, parent };
-      return (
-        levelParent(node.left, target, level + 1, node) ||
-        levelParent(node.right, target, level + 1, node)
-      );
+    function levelParent (node, target, level=0, parent = null) {
+      if(!node) return null;
+      if (node === target) return {level, parent};
+      return(
+        levelParent(node.left, target, level +1, node) || levelParent(node.right, target, level+1, node));
+      
     }
-    const cousins1 = levelParent(this.root, node1);
-    const cousins2 = levelParent(this.root, node2);
-    return (
-      cousins1 &&
-      cousins2 &&
-      cousins1.level === cousins2.level &&
-      cousins1.parent !== cousins2.parent
-    );
+    const cousins1= levelParent(this.root, node1);
+    const cousins2= levelParent(this.root, node2);
+    return cousins1 && cousins2 && cousins1.parent !==cousins2.parent;
   }
 
   /** Further study!
@@ -101,34 +94,36 @@ class BinaryTree {
   static serialize(tree) {
     const values = [];
 
-    function traverse(node) {
-      if (node) {
-        values.push(node.val);
-        traverse(node.left);
-        traverse(node.right);
-      } else {
-        values.push(null);
+    function traverse(node){
+      if(node){
+        if(node){
+          values.push(node.val);
+          traverse(node.left);
+          traverse(node.right);
+        } else{
+          values.push(null);
+        }
       }
+      traverse(tree.root);
+    return.JSON.stringify(values);
     }
-    traverse(tree.root);
-    return JSON.stringify(values);
-  }
+  
 
   /** Further study!
    * deserialize(stringTree): deserialize stringTree into a BinaryTree object. */
 
   static deserialize(stringTree) {
-    const values = JSON.parse(stringTree);
-    let index = 0;
+    const values=JSON.parse(stringTree);
+    let index=0;
 
-    function newTree() {
-      if (index >= values.length || values[index] === null) {
+    function newTree(){
+      if(index>= values.length || values[index]===null) {
         index++;
         return null;
       }
-      const node = new BinaryTreeNode(values[index++]);
-      node.left = newTree();
-      node.right = newTree();
+      const node=new BinaryTreeNode(values[index++]);
+      node.left=newTree();
+      node.right=newTree();
       return node;
     }
     return new BinaryTree(newTree());
@@ -139,13 +134,13 @@ class BinaryTree {
    * of two nodes in a binary tree. */
 
   lowestCommonAncestor(node1, node2) {
-    function helper(node) {
-      if (!node || node === node1 || node === node2) return node;
+    function helper(node){
+      if(!node || node===node1 || node===node2) return node;
+      
+      const left= helper(node.left);
+      const right=helper(node.right);
 
-      const left = helper(node.left);
-      const right = helper(node.right);
-
-      if (left && right) return node;
+      if(left && right) return node;
       return left || right;
     }
     return helper(this.root);
